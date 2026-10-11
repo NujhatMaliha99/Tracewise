@@ -1,0 +1,8 @@
+.login-page { min-height: 100dvh; display: grid; place-items: center; border-top: 5px solid #2a62e8; background: #f4f5f8; }
+.login-main { width: min(100% - 40px, 420px); padding: 48px 0; }
+.login-brand { display: flex; align-items: center; gap: 12px; font-size: 28px; font-weight: 700; margin-bottom: 48px; color: #191c22; }
+.login-main h1 { font-size: 28px; line-height: 1.2; margin: 12px 0 28px; }
+.login-main .field { margin-bottom: 20px; }
+.login-main .text-input { width: 100%; min-height: 44px; box-sizing: border-box; }
+.login-main .button { width: 100%; min-height: 44px; justify-content: center; }
+.login-main .footnote { margin-top: 24px; }

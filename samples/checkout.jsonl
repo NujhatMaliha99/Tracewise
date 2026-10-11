@@ -1,0 +1,14 @@
+{"timestamp":"2026-10-12T09:00:00Z","level":"INFO","service":"gateway","message":"Request accepted","request_id":"req-a1","method":"POST","path":"/checkout"}
+{"timestamp":"2026-10-12T09:00:02Z","level":"INFO","service":"checkout-api","message":"Calling payment dependency","request_id":"req-a1"}
+{"timestamp":"2026-10-12T09:00:05Z","level":"ERROR","service":"checkout-api","message":"Payment dependency timed out after 3000ms","request_id":"req-a1","status":504,"path":"/checkout"}
+{"timestamp":"2026-10-12T09:01:01Z","level":"WARN","service":"gateway","message":"Retry requested after checkout failure","request_id":"req-a2"}
+{"timestamp":"2026-10-12T09:01:04Z","level":"ERROR","service":"checkout-api","message":"Payment dependency timed out after 4000ms","request_id":"req-a2","status":504,"path":"/checkout"}
+{"timestamp":"2026-10-12T09:02:00Z","level":"INFO","service":"inventory-api","message":"Health check passed","request_id":"req-b1","status":200}
+{"timestamp":"2026-10-12T09:02:10Z","level":"ERROR","service":"checkout-api","message":"Inventory dependency ECONNREFUSED at inventory:8080","request_id":"req-a3","status":503,"path":"/checkout"}
+{"timestamp":"2026-10-12T09:03:10Z","level":"ERROR","service":"checkout-api","message":"Inventory dependency ECONNREFUSED at inventory:8080","request_id":"req-a4","status":503,"path":"/checkout"}
+{"timestamp":"2026-10-12T09:03:15Z","level":"ERROR","service":"catalog-api","message":"Database connection pool exhausted; active=20 limit=20","request_id":"req-c1","status":503,"path":"/products"}
+{"timestamp":"2026-10-12T09:04:10Z","level":"ERROR","service":"catalog-api","message":"Database connection pool exhausted; active=30 limit=30","request_id":"req-c2","status":503,"path":"/products"}
+{"timestamp":"2026-10-12T09:04:30Z","level":"INFO","service":"gateway","message":"Request completed","request_id":"req-d1","status":200,"path":"/health"}
+{"timestamp":"2026-10-12T09:05:00Z","level":"ERROR","service":"webhook-api","message":"Unexpected event schema version","request_id":"req-e1","status":500,"path":"/webhook"}
+{"timestamp":"2026-10-12T09:05:10Z","level":"WARN","service":"gateway","message":"HTTP 429 rate limit exceeded","request_id":"req-f1","status":429}
+{"timestamp":"2026-10-12T09:06:00Z","level":"INFO","service":"checkout-api","message":"Checkout completed","request_id":"req-g1","status":200}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in | Tracewise</title>
+  <link rel="icon" href="/favicon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/refinements.css">
+  <link rel="stylesheet" href="/login.css">
+  <script src="/login.js" defer></script>
+</head>
+<body class="login-page">
+  <main class="login-main">
+    <div class="login-brand"><img src="/favicon.svg" width="44" height="44" alt=""><span>Tracewise</span></div>
+    <p class="eyebrow">INCIDENT OPERATIONS</p>
+    <h1>Sign in to your workspace</h1>
+    <form id="login-form">
+      <div class="field"><label for="username">Username</label><input class="text-input" id="username" name="username" autocomplete="username" maxlength="80" required autofocus></div>
+      <div class="field"><label for="password">Password</label><input class="text-input" id="password" name="password" type="password" autocomplete="current-password" maxlength="256" required></div>
+      <p id="login-error" class="import-error" role="alert"></p>
+      <button type="submit" class="button primary">Sign in</button>
+    </form>
+    <p class="footnote" id="login-status">Secure workspace access</p>
+  </main>
+</body>
+</html>

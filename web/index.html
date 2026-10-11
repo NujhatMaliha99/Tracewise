@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>API Failure Investigator</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="refinements.css">
+  <script defer src="vendor/lucide.min.js"></script>
+  <script defer src="access.js"></script>
+  <script defer src="app.js"></script>
+  <script defer src="platform.js"></script>
+  <script defer src="monitoring.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to investigation</a>
+  <aside class="sidebar">
+    <a class="brand" href="#investigation"><span class="brand-icon"><i data-lucide="activity"></i></span><span>Tracewise<small>API FAILURE INVESTIGATOR</small></span></a>
+    <div class="nav-label">WORKSPACE</div>
+    <nav aria-label="Workspace">
+      <span class="nav-group">INVESTIGATE</span>
+      <a href="#investigation" data-view="investigation"><i data-lucide="layers"></i> Investigation</a>
+      <a href="#events" data-view="events"><i data-lucide="list-filter"></i> Event stream</a>
+      <a href="#live" data-view="live"><i data-lucide="radio"></i> Live ingestion</a>
+      <span class="nav-group">OBSERVE</span>
+      <a href="#monitors" data-view="monitors"><i data-lucide="heart-pulse"></i> API monitors</a>
+      <a href="#alerts" data-view="alerts"><i data-lucide="bell-ring"></i> Alert inbox</a>
+      <a href="#integrations" data-view="integrations"><i data-lucide="plug"></i> SDK integrations</a>
+      <a href="#history" data-view="history"><i data-lucide="inbox"></i> Saved incidents</a>
+      <span class="nav-group">INTELLIGENCE</span>
+      <a href="#analytics" data-view="analytics"><i data-lucide="chart-no-axes-combined"></i> Service analytics</a>
+      <a href="#search" data-view="search"><i data-lucide="search"></i> Incident search</a>
+      <a href="#anomalies" data-view="anomalies"><i data-lucide="scan-line"></i> Anomaly analysis</a>
+      <a href="#compare" data-view="compare"><i data-lucide="git-compare-arrows"></i> Compare incidents</a>
+      <a href="#runbooks" data-view="runbooks"><i data-lucide="book-open"></i> Runbooks</a>
+      <a href="#method" data-view="method"><i data-lucide="shield-check"></i> Analysis method</a>
+    </nav>
+    <div class="side-session"><span class="status-dot"></span> Incident workspace<small>Evidence-led diagnostics</small></div>
+    <div class="side-bottom"><i data-lucide="terminal"></i><span>Developer workspace<small>v0.4.0 / Controlled egress</small></span></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><span class="breadcrumb">Workspace <i data-lucide="chevron-right"></i> <strong id="crumb">Investigation</strong></span><span class="privacy"><i data-lucide="lock-keyhole"></i> Local only</span></header>
+    <main id="main">
+      <div class="page-heading"><div><div class="eyebrow"><span></span> OBSERVABILITY / TRIAGE</div><h1>API Failure Investigator</h1><p id="source-name">Loading investigation...</p></div><div class="actions"><button id="demo" class="button secondary"><i data-lucide="flask-conical"></i> Run demo API</button><button id="upload" class="button primary"><i data-lucide="upload"></i> Import logs</button></div></div>
+      <div id="notice" class="notice" role="status" hidden></div>
+      <div id="error" class="error-banner" role="alert" hidden></div>
+      <div class="sourcebar"><span id="source-type" class="badge">SAMPLE FIXTURE</span><span id="range">All timestamps UTC</span><div class="source-actions"><button id="sample" title="Open sample investigation" aria-label="Open sample investigation"><i data-lucide="file-code-2"></i></button><a href="/api/sample" title="Download sample logs" aria-label="Download sample logs"><i data-lucide="download"></i></a><button id="export" title="Export redacted investigation JSON" aria-label="Export investigation"><i data-lucide="file-down"></i></button><button id="clear" title="Clear investigation" aria-label="Clear investigation"><i data-lucide="trash-2"></i></button></div></div>
+      <div id="content" aria-busy="true"></div>
+      <footer><span><span class="status-dot"></span> Evidence-led analysis</span><span>Hypotheses, not verified root causes</span></footer>
+    </main>
+  </div>
+  <dialog id="import-dialog" aria-labelledby="import-title"><form id="import-form"><div class="dialog-heading"><h2 id="import-title">Import logs</h2><button type="button" id="close-dialog" class="icon-button" aria-label="Close import"><i data-lucide="x"></i></button></div><label class="dropzone" id="dropzone"><i data-lucide="file-up"></i><strong>Choose a log file</strong><span>JSONL, JSON, CSV, LOG or TXT / up to 4 MiB</span><input id="file-input" type="file" accept=".jsonl,.ndjson,.json,.csv,.log,.txt"></label><div class="field"><label for="log-input">Log content</label><textarea id="log-input" rows="8" spellcheck="false" placeholder='{"timestamp":"2026-10-12T09:00:00Z","level":"ERROR","service":"api","message":"Connection refused"}'></textarea></div><div class="import-meta"><span id="file-name">Pasted logs</span><span id="file-size">0 bytes</span></div><p class="security-note"><i data-lucide="shield"></i> Best-effort secret redaction. Review sensitive logs before importing.</p><div id="import-error" role="alert" class="import-error"></div><div class="dialog-footer"><button type="button" id="cancel-import" class="button secondary">Cancel</button><button type="submit" id="analyze" class="button primary"><i data-lucide="scan-line"></i> Analyze logs</button></div></form></dialog>
+</body>
+</html>
