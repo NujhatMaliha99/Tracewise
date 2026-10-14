@@ -86,9 +86,10 @@ def probe(config, policy=None):
 
 
 class MonitorEngine:
-    def __init__(self, store, stream, probe_fn=probe, clock=time.time, policy=None, delivery=None):
+    def __init__(self, store, stream, probe_fn=probe, clock=time.time, policy=None, delivery=None, observer=None):
         self.store, self.stream, self.probe_fn, self.clock = store, stream, probe_fn, clock
         self.policy, self.delivery = policy, delivery
+        self.observer, self.observer_error = observer, None
         if probe_fn is probe:
             self.probe_fn = lambda config: probe(config, policy)
         self.lock = threading.RLock()
@@ -186,6 +187,7 @@ class MonitorEngine:
         with self.lock:
             item = self.get(monitor_id)
             config, state = item["config"], item["state"]
+            prior_alert = state["alert_id"]
             if scheduled and (not config["enabled"] or state["next_check"] > self.clock()):
                 return item
             result = self.probe_fn(config)
@@ -232,4 +234,10 @@ class MonitorEngine:
                     state["phase"] = "healthy" if result["success"] else "degraded"
                 self.store.db.execute("UPDATE monitors SET state=? WHERE id=?", (json.dumps(state), monitor_id))
             self.stream.ingest(json.dumps(event))
+            if self.observer:
+                try:
+                    self.observer(monitor_id, config, result, state["alert_id"] or prior_alert, recovered=bool(prior_alert and not state["alert_id"]))
+                    self.observer_error = None
+                except Exception as exc:
+                    self.observer_error = type(exc).__name__
             return self.get(monitor_id)

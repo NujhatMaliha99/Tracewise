@@ -1,5 +1,43 @@
 # Verification
 
+## Multi-Service Observability (v0.5)
+
+195 Python tests and four Node SDK tests pass. New coverage includes real
+four-listener trace propagation, parent references, optional span parsing,
+nonfinite/bounded duration validation, secret redaction, conservative temporal
+correlation, missing/undated evidence, three actual fault mechanisms, worker
+consent/config limits/concurrency/cancellation, interrupted restart state,
+idempotent correlated case retention, viewer/admin permissions and JSON/Markdown
+HTTP exports. A Windows SQLite cleanup failure found during implementation was
+fixed by explicitly closing connections before temporary-directory cleanup.
+
+An actual three-seed matrix was launched from the dashboard: seeds 7, 19, 42,
+all four scenarios, 12 completed runs, 144 gateway checks and 972 spans. Nine
+fault runs produced no missed injected incidents or duplicate detector alerts;
+three baseline runs produced no false alerts. This is a small accelerated,
+controlled matrix, not production accuracy or load capacity. Measured values
+are in reports/mesh-benchmark-2026-10-14.md, not hard-coded into results.
+
+Browser startup initially failed, recovered after one runtime reset. Desktop
+experiment controls/progress/results, run-to-trace drill-down, nonblank span
+waterfalls/dependency graph, anchor counts, episode disclosure, explicit case
+retention consent and successful case creation were verified on isolated port
+8792. A database-contention episode linked four request IDs and 19 error-event
+references; the resulting saved case retains synthetic provenance. Screenshots
+are observability-dependencies.png, observability-experiments.png,
+observability-traces.png, observability-mobile.png and observability-traces-mobile.png.
+Mobile 390 x 650 views measured equal document/client widths of 375; waterfall
+rows were visually inspected without overlap. Viewport overrides were reset.
+
+The preview has a separate SQLite DB and no SMTP configuration. User monitors,
+Task API and email settings were not changed. Browser download completion is
+not claimed; JSON/Markdown attachment responses are HTTP-tested. Standalone
+mesh JSON export is implemented, but its manual Ctrl+C workflow is not separately
+browser-tested. Configured topology and heuristic dependency candidates are
+not automatic infrastructure discovery, W3C/OpenTelemetry compatibility, live
+production alert regrouping or verified root causes. No autonomous repair,
+public deployment or production security certification is claimed.
+
 ## Independent Task API Integration
 
 Eight additional tests cover task CRUD, actual database-backed health/503 errors,
@@ -201,3 +239,70 @@ port, including the 15-request controlled demo. No internet services are used.
 - Public deployment, authentication and multi-user storage are not included.
 
 Screenshots show the explicitly labelled synthetic sample investigation.
+# Version 0.6 Verification / 2026-10-14
+
+- Full suite: 214 Python tests passed; existing Node SDK suite: 4 tests passed.
+- Official OpenTelemetry SDK exporter delivered binary spans to the real HTTP receiver.
+- Real loopback HTTP example: one W3C trace, two services, three spans, zero missing parents.
+- Tests cover opt-in retention, invalid/gzip-bounded payloads, partial rejection, retries,
+  catalog cycle rollback, archive and version checks, environment isolation, authenticated
+  role/key scope, restart persistence, incremental late evidence, merge/split stickiness,
+  and bound-monitor recovery timeline without automatic resolution.
+- Browser verified catalog ownership edit, live owner/status/note update, split/merge and
+  retained-evidence waterfall/dependency views. No browser error/warning logs were observed.
+- Desktop and 390px mobile screenshots saved under `docs/screenshots/live-*`.
+  Mobile document client and scroll widths both measured 375px, with no horizontal page overflow.
+- Isolated preview: port 8793, `storage/live-workspace.sqlite3`; controlled example telemetry only.
+  The user's email-enabled port-8790 server was not restarted or reconfigured.
+
+These checks establish local behavior, not production scalability, verified causal diagnosis,
+real customer outage detection accuracy, or public deployment readiness.
+# Version 0.7 Verification / 2026-10-15
+
+- Full suite: 240 Python tests passed. Node SDK: 4 tests passed. New frontend scripts pass syntax checks.
+- 22 focused reliability/review tests cover formulas, HTTP classification, client/monitor exclusion,
+  latency boundaries, sample minimums, unknown/missing/future evidence, environment isolation,
+  before/after comparison abstention, version conflicts, audit history, Markdown escaping,
+  multiline-note redaction, merged-source actions and restart persistence.
+- New authenticated HTTP coverage verifies admin-only objectives, operator changes/actions,
+  read-only viewer access, explicit consent and Markdown/JSON export responses.
+- Initial regression run observed intermittent Windows socket resets on rejected POST requests.
+  Small rejected bodies now have bounded draining; a 30-request rejection regression passes.
+  The subsequent complete 240-test run passed without retrying individual tests.
+- Browser verified objective creation, actual error-budget consumption, change marker creation,
+  insufficient-evidence comparison, action creation/status update, and incident/review cross-navigation
+  with operator notes. Restart preserved the preview objective, change marker and follow-up action.
+- Controlled preview used five actual healthy gateway requests and three actual failed requests
+  after stopping the temporary tasks listener: 21 retained spans, eight gateway SERVER spans,
+  three bad gateway requests. The demo objective minimum of five is not production validation.
+- Desktop and 390px mobile screenshots: `docs/screenshots/reliability-*`. Each mobile view measured
+  document clientWidth=scrollWidth=375px; internal data tables may scroll horizontally by design.
+- A generated controlled-example [Markdown review](reports/reliability-review-2026-10-15.md) is retained.
+- Preview: port 8794, `storage/reliability-preview.sqlite3`; no SMTP configuration. The user's
+  email-enabled port-8790 server and existing previews were not restarted or reconfigured.
+
+No production SLA, causal deployment effect, complete outage duration, public deployment,
+autonomous remediation, or notification-delivery claim follows from these local checks.
+# Version 0.8 Verification / 2026-10-15
+
+- Complete regression suite: 258 Python tests passed. New frontend safety module passes Node syntax checks.
+- Backup tests cover committed snapshots, manifest/checksum validation, explicit source trust,
+  non-overwrite behavior, trigger/schema rejection, malformed archives, legacy base workspaces,
+  and restore quarantine without changing the original workspace.
+- Limiter tests cover refill, Retry-After, category/client/global scopes, bounded bucket memory,
+  idle expiry and concurrent token admission. Authenticated HTTP tests verify backup/safety role
+  enforcement, consent, ZIP response, 429 JSON/protobuf responses, forwarded-header isolation,
+  and connection-capacity 503 followed by successful recovery.
+- End-to-end CLI drill exported the controlled reliability workspace and restored it to the separate
+  `storage/safety-preview-v08.sqlite3`. Checks reported quarantined=true, monitors_enabled=false,
+  telemetry_enabled=false and pending_delivery_replay=false. No existing database was overwritten.
+- Browser verified the admin safety console and explicit-consent backup form; the application reported
+  the archive prepared. Browser automation did not return a completed blob-download event, so browser
+  file persistence is not independently confirmed. The HTTP ZIP and CLI recovery were verified separately.
+- Desktop/mobile safety screenshots are retained; 390px mobile viewport measured clientWidth=scrollWidth=375px.
+- Source scan found no configured account email, common GitHub/AWS/private-key signatures or real SMTP
+  password assignments in release files. This is a limited pattern scan, not a secret-leak guarantee.
+- The user's email-enabled port-8790 server was not restarted or reconfigured. Final safety preview is
+  port 8795 with its own restored/quarantined database. Request limits remain single-process controls.
+
+No public hosting, distributed load test, DDoS resilience or production security certification is claimed.

@@ -1,5 +1,15 @@
 # Tracewise Architecture
 
+Version 0.5 adds an isolated ExperimentManager worker, four actual loopback
+HTTP services in mesh.py, and pure trace/correlation transforms in
+observability.py. Experiment records persist configuration, actual samples,
+spans and measured metrics in the experiments SQLite table. The worker reuses
+MonitorEngine without its scheduler or notification channel. It owns only its
+temporary listeners/database, closes HTTP threads and SQLite handles, and
+supports cooperative cancellation. Startup marks unfinished jobs interrupted.
+The browser reads artifacts through authenticated experiment endpoints; case
+retention is a separate consented, idempotent write. See OBSERVABILITY.md.
+
 ```text
 Browser workspace
   |-- import, grouping, evidence, exact request traces
@@ -75,3 +85,19 @@ External integrations and real streaming ingestion should use explicit adapters
 without bypassing redaction and access boundaries. Local HTTP ingestion exists;
 durable production streaming and brokers are not implemented. Generic remote
 webhook delivery is implemented, but provider-specific adapters are not.
+# Version 0.6 Extension
+
+`catalog.py` stores versioned environment-scoped services, monitor bindings and explicit DAG edges.
+`otlp.py` decodes standard OTLP/HTTP using official protobuf schemas; `telemetry.py` stores opt-in
+evidence and incrementally assigns complete requests to durable incident candidates. Manual
+merge/split assignments are sticky and version-checked. Observer failures remain visible without
+interrupting monitor/email operations. `web/telemetry.js` adds catalog, connection and incident views.
+The transient SDK buffer remains separate. See [live telemetry boundaries](LIVE_TELEMETRY.md).
+# Version 0.7 Extension
+
+`reliability.py` owns versioned SLO configuration, descriptive retained-request statistics, and
+immutable service-change markers. `reviews.py` assembles evidence-first reviews and maintains
+versioned follow-up actions. Both reuse catalog identities and opt-in telemetry evidence under
+the existing SQLite transaction lock; neither adds egress, SMTP behavior, or a background pager.
+`web/reliability.js` provides three connected work surfaces with guarded polling and environment-aware
+navigation back to live incidents. The data-quality and sampling boundaries are [documented](RELIABILITY.md).

@@ -10,6 +10,9 @@ if ($env:TRACEWISE_WEBHOOK_URL) {
     throw 'Webhook delivery is already configured. Review its pending queue before choosing email instead.'
 }
 $root = Split-Path $PSScriptRoot -Parent
+if (-not $PSBoundParameters.ContainsKey('Python') -and (Test-Path (Join-Path $root '.venv/Scripts/python.exe'))) {
+    $Python = Join-Path $root '.venv/Scripts/python.exe'
+}
 $sender = Read-Host 'Sender mailbox (for Gmail, use your personal Gmail address)'
 $recipient = Read-Host 'Recipient mailbox (press Enter to send to yourself)'
 if (-not $recipient) { $recipient = $sender }

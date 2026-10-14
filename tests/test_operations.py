@@ -171,12 +171,163 @@ class AuthHTTPTests(unittest.TestCase):
         self.assertEqual(self.request("/api/live/clear", {}, cookie)[0], 200)
         self.assertEqual(self.request("/api/monitors", {}, cookie)[0], 403)
 
+    def test_experiments_require_admin_but_trace_analysis_allows_viewer(self):
+        cookie = self.login("viewer")
+        self.assertEqual(self.request("/api/experiments", cookie=cookie)[0], 200)
+        self.assertEqual(self.request("/api/experiments", {"retain": True}, cookie)[0], 403)
+        self.assertEqual(self.request("/api/experiments/cancel", {}, cookie)[0], 403)
+        status = self.request("/api/traces/analyze", {"content": json.dumps({"message": "test", "request_id": "a"})}, cookie)[0]
+        self.assertEqual(status, 200)
+
     def test_admin_operations_and_attributed_audit(self):
         cookie = self.login("admin")
         self.assertEqual(self.request("/api/live/clear", {}, cookie)[0], 200)
         status, _, body = self.request("/api/operations", cookie=cookie)
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(body)["audit"][0]["username"], "admin")
+
+    def test_catalog_and_retention_require_admin(self):
+        for role in ("viewer", "operator"):
+            cookie = self.login(role)
+            self.assertEqual(self.request("/api/catalog", cookie=cookie)[0], 200)
+            self.assertEqual(self.request("/api/catalog", {"name": "api"}, cookie)[0], 403)
+            self.assertEqual(self.request("/api/telemetry/settings", {"enabled": True, "retain": True}, cookie)[0], 403)
+        cookie = self.login("admin")
+        self.assertEqual(self.request("/api/catalog", {"name": "api"}, cookie)[0], 200)
+        self.assertEqual(self.request("/api/telemetry/settings", {"enabled": True, "retain": True}, cookie)[0], 200)
+
+    def test_otlp_scoped_key_and_session_roles(self):
+        self.server.telemetry_key = "t" * 32
+        self.server.telemetry.configure(True, True)
+        self.assertEqual(self.request("/v1/traces", {}, self.login("viewer"))[0], 403)
+        self.assertEqual(self.request("/v1/traces", {}, self.login("operator"))[0], 200)
+        status, _, body = self.request("/v1/traces", {}, extra={"Authorization": "Bearer " + "x" * 32})
+        self.assertEqual(status, 401)
+        self.assertEqual(json.loads(body)["code"], 16)
+        self.assertEqual(self.request("/v1/traces", {}, extra={"Authorization": "Bearer " + "t" * 32})[0], 200)
+        self.assertEqual(self.request("/api/catalog", {"name": "forbidden"}, extra={"Authorization": "Bearer " + "t" * 32})[0], 401)
+        self.assertEqual(self.request("/api/live-incidents", extra={"Authorization": "Bearer " + "t" * 32})[0], 401)
+
+    def test_incident_operator_permissions_and_conflict(self):
+        from test_telemetry import evidence
+        self.server.catalog.create({"name": "api"})
+        self.server.telemetry.configure(True, True)
+        self.server.telemetry.ingest([evidence()])
+        item = self.server.telemetry.incidents()[0]
+        path = "/api/live-incidents/" + item["id"]
+        body = {"changes": {"owner": "Team"}, "version": item["version"]}
+        self.assertEqual(self.request(path, body, self.login("viewer"))[0], 403)
+        cookie = self.login("operator")
+        self.assertEqual(self.request(path, body, cookie)[0], 200)
+        self.assertEqual(self.request(path, body, cookie)[0], 409)
+
+    def test_reliability_objective_permissions_and_history(self):
+        from test_reliability import config
+        service = self.server.catalog.create({"name": "api"})
+        for role in ("viewer", "operator"):
+            cookie = self.login(role)
+            self.assertEqual(self.request("/api/reliability", cookie=cookie)[0], 200)
+            self.assertEqual(self.request("/api/objectives", config(service["id"]), cookie)[0], 403)
+        cookie = self.login("admin")
+        status, _, body = self.request("/api/objectives", config(service["id"]), cookie)
+        self.assertEqual(status, 200)
+        item = json.loads(body)
+        self.assertEqual(self.request("/api/objectives/" + item["id"] + "/history", cookie=cookie)[0], 200)
+        status = self.request("/api/objectives/" + item["id"], {"config": config(target=95), "version": 1}, cookie)[0]
+        self.assertEqual(status, 200)
+        self.assertEqual(self.request("/api/objectives/" + item["id"], {"config": config(), "version": 1}, cookie)[0], 409)
+
+    def test_change_and_review_permissions_exports_and_consent(self):
+        from test_reliability import record, stamp
+        import time
+        service = self.server.catalog.create({"name": "api"})
+        self.server.telemetry.configure(True, True)
+        self.server.telemetry.ingest([record(1, 503, at=time.time()-5)])
+        item = self.server.telemetry.incidents()[0]
+        change = {"service_id": service["id"], "kind": "deployment", "title": "Controlled release", "revision": "v1", "occurred_at": stamp(time.time()), "note": "Test marker"}
+        viewer = self.login("viewer"); operator = self.login("operator")
+        self.assertEqual(self.request("/api/changes", {"change": change, "retain": True}, viewer)[0], 403)
+        self.assertEqual(self.request("/api/changes", {"change": change}, operator)[0], 400)
+        self.assertEqual(self.request("/api/changes", {"change": change, "retain": True}, operator)[0], 200)
+        action = {"title": "Check timeout", "owner": "Platform", "due_at": None}
+        path = "/api/reviews/" + item["id"]
+        self.assertEqual(self.request(path, cookie=viewer)[0], 200)
+        self.assertEqual(self.request(path + "/actions", {"action": action, "retain": True}, viewer)[0], 403)
+        status, _, body = self.request(path + "/actions", {"action": action, "retain": True}, operator)
+        self.assertEqual(status, 200)
+        action_id = json.loads(body)["id"]
+        payload = {"changes": {"status": "done"}, "version": 1}
+        self.assertEqual(self.request("/api/followups/" + action_id, payload, viewer)[0], 403)
+        self.assertEqual(self.request("/api/followups/" + action_id, payload, operator)[0], 200)
+        status, headers, body = self.request(path + "/report", cookie=viewer)
+        self.assertEqual(status, 200)
+        self.assertIn("text/markdown", headers["Content-Type"])
+        self.assertIn("attachment", headers["Content-Disposition"])
+        self.assertIn(b"DRAFT", body)
+        self.assertEqual(self.request(path + "/export", cookie=viewer)[0], 200)
+
+    def test_reliability_endpoints_fail_closed_and_invalid_payloads(self):
+        for path in ("/api/reliability", "/api/changes", "/api/reviews/missing"):
+            self.assertEqual(self.request(path)[0], 401)
+        admin = self.login("admin")
+        self.assertEqual(self.request("/api/objectives", [], admin)[0], 400)
+        self.assertEqual(self.request("/api/objectives", {"unknown": "field"}, admin)[0], 400)
+        self.assertEqual(self.request("/api/changes", {"change": []}, admin)[0], 400)
+        self.assertEqual(self.request("/api/reviews/missing", cookie=admin)[0], 404)
+
+    def test_repeated_small_rejections_deliver_http_error_without_reset(self):
+        cookie = self.login("viewer")
+        for _ in range(30):
+            self.assertEqual(self.request("/api/telemetry/settings", {"enabled": True, "retain": True}, cookie)[0], 403)
+
+    def test_backup_and_safety_permissions_consent_and_download(self):
+        from investigator.backups import unpack
+        for role in ("viewer", "operator"):
+            cookie = self.login(role)
+            self.assertEqual(self.request("/api/safety", cookie=cookie)[0], 403)
+            self.assertEqual(self.request("/api/backups/export", {"include_workspace": True}, cookie)[0], 403)
+        admin = self.login("admin")
+        self.assertEqual(self.request("/api/safety", cookie=admin)[0], 200)
+        self.assertEqual(self.request("/api/backups/export", {}, admin)[0], 400)
+        status, headers, data = self.request("/api/backups/export", {"include_workspace": True}, admin)
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["Content-Type"], "application/zip")
+        self.assertIn("attachment", headers["Content-Disposition"])
+        self.assertEqual(unpack(data)[0]["encrypted"], False)
+
+    def test_rate_limit_returns_429_retry_after_and_ignores_forwarded_headers(self):
+        from investigator.limits import RateLimits
+        self.server.rate_limits = RateLimits({"read": (1, 60)}, clock=lambda: 0)
+        self.assertEqual(self.request("/api/health", extra={"X-Forwarded-For": "192.0.2.1"})[0], 200)
+        status, headers, body = self.request("/api/health", extra={"X-Forwarded-For": "192.0.2.2"})
+        self.assertEqual(status, 429)
+        self.assertEqual(headers["Retry-After"], "60")
+        self.assertEqual(json.loads(body)["retry_after"], 60)
+
+    def test_otlp_throttle_preserves_standard_error_encoding(self):
+        from investigator.limits import RateLimits
+        from google.rpc.status_pb2 import Status
+        self.server.rate_limits = RateLimits({"ingest": (1, 60)}, clock=lambda: 0)
+        self.server.telemetry_key = "t" * 32
+        self.server.telemetry.configure(True, True)
+        extra = {"Authorization": "Bearer " + "t" * 32}
+        self.assertEqual(self.request("/v1/traces", {}, extra=extra)[0], 200)
+        connection = http.client.HTTPConnection("127.0.0.1", self.server.server_port, timeout=5)
+        connection.request("POST", "/v1/traces", b"", extra | {"Content-Type": "application/x-protobuf"})
+        response = connection.getresponse()
+        self.assertEqual(response.status, 429)
+        self.assertEqual(response.getheader("Content-Type"), "application/x-protobuf")
+        self.assertEqual(Status.FromString(response.read()).code, 8)
+        connection.close()
+
+    def test_connection_capacity_rejects_and_recovers(self):
+        for _ in range(self.server.connection_limit): self.server.connection_slots.acquire()
+        try:
+            self.assertEqual(self.request("/api/health")[0], 503)
+        finally:
+            for _ in range(self.server.connection_limit): self.server.connection_slots.release()
+        self.assertEqual(self.request("/api/health")[0], 200)
+        self.assertEqual(self.server.connection_denials, 1)
 
     def test_csrf_origin_denied(self):
         cookie = self.login("admin")

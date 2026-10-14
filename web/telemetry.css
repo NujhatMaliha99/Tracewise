@@ -1,0 +1,9 @@
+.catalog-description {display:block;max-width:320px;white-space:normal;color:var(--muted);margin-top:6px;overflow-wrap:anywhere}
+.dependency-surface {overflow:auto;max-width:100%}
+.operation-facts {display:grid;grid-template-columns:160px minmax(0,1fr);gap:16px;margin:24px 0}
+.operation-facts dd {margin:0;overflow-wrap:anywhere}.operation-facts dt {color:var(--muted)}
+.incident-timeline {list-style:none;padding:0;margin:24px 0}.incident-timeline li {border-left:2px solid var(--accent);padding:0 0 20px 18px;margin-left:4px}
+.incident-timeline small {display:block;color:var(--muted);margin:6px 0}.span-detail pre {white-space:pre-wrap;overflow-wrap:anywhere;max-height:360px;overflow:auto;font-size:12px}
+#service-form label,#binding-form label,#incident-edit-form label,#incident-merge-form label {display:grid;gap:8px;margin:12px 0}
+#service-form .consent {display:flex}#incident-note {min-height:100px;width:100%;box-sizing:border-box}
+@media(max-width:650px){.operation-facts{grid-template-columns:1fr;gap:8px}.operation-facts dd{margin-bottom:12px}.span-detail .actions{flex-wrap:wrap}}

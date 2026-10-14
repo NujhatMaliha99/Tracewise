@@ -38,13 +38,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     if (window.lucide) window.lucide.createIcons();
     const applyRole = () => {
+      for (const link of document.querySelectorAll("[data-admin-nav]")) link.hidden = session.identity?.role !== "admin";
       if (session.identity?.role === "admin") return;
-      for (const control of document.querySelectorAll("#monitor-add,[data-monitor-settings],[data-monitor-check],[data-monitor-toggle],#demo-healthy,#demo-failure")) {
+      for (const control of document.querySelectorAll("[data-admin-only],[data-save-episode],#experiment-start,#experiment-cancel,#monitor-add,[data-monitor-settings],[data-monitor-check],[data-monitor-toggle],#demo-healthy,#demo-failure")) {
         control.disabled = true;
         control.title = "Administrator role required";
       }
       if (session.identity?.role === "viewer") {
-        for (const control of document.querySelectorAll("#save-investigation,#demo,#seed-workspace,#live-clear,#manage-form input,#manage-form select,#manage-form button,#note-form textarea,#note-form button")) {
+        for (const control of document.querySelectorAll("[data-operator-only],#save-investigation,#demo,#seed-workspace,#live-clear,#manage-form input,#manage-form select,#manage-form button,#note-form textarea,#note-form button")) {
           control.disabled = true;
           control.title = "Operator role required";
         }

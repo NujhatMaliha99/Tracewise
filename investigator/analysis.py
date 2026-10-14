@@ -4,6 +4,7 @@ import csv
 import hashlib
 import io
 import json
+import math
 import re
 from collections import Counter
 from datetime import datetime, timezone
@@ -68,7 +69,7 @@ def normalize_record(raw, number):
         status = None
     if status and status >= 500 and level not in {"ERROR", "FATAL"}:
         level = "ERROR"
-    return {
+    result = {
         "id": f"L{number:05d}", "line": number,
         "timestamp": timestamp(first(row, "timestamp", "time", "ts", "datetime", default=None)),
         "level": level, "service": str(first(row, "service", "app", "logger", default="unknown"))[:150],
@@ -77,6 +78,17 @@ def normalize_record(raw, number):
         "path": str(first(row, "path", "endpoint", "route"))[:1000],
         "status": status,
     }
+    for key in ("span_id", "parent_span_id", "dependency"):
+        if key in row:
+            result[key] = str(row[key])[:150]
+    if row.get("span_kind") in ("client", "server"):
+        result["span_kind"] = row["span_kind"]
+    if "start_time" in row:
+        result["start_time"] = timestamp(row["start_time"])
+    duration = row.get("duration_ms")
+    if isinstance(duration, (int, float)) and not isinstance(duration, bool) and 0 <= duration <= 3600000 and math.isfinite(duration):
+        result["duration_ms"] = duration
+    return result
 
 
 def parse_logs(content):

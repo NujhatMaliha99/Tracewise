@@ -1,7 +1,7 @@
 "use strict";
 
 const platform = {cases: [], active: null, request: 0, historyQuery: "", historyStatus: "all", historySort: "updated", archived: false};
-const platformViews = {history: "Saved incidents", live: "Live ingestion", monitors: "API monitors", alerts: "Alert inbox", integrations: "SDK integrations", analytics: "Service analytics", search: "Incident search", anomalies: "Anomaly analysis", compare: "Compare incidents", runbooks: "Runbooks"};
+const platformViews = {safety: "Workspace safety", reliability: "Reliability objectives", changes: "Change intelligence", reviews: "Incident reviews", catalog: "Service catalog", incidents: "Live incidents", connections: "Telemetry connections", traces: "Request traces", dependencies: "Dependency incidents", experiments: "Fault experiments", history: "Saved incidents", live: "Live ingestion", monitors: "API monitors", alerts: "Alert inbox", integrations: "SDK integrations", analytics: "Service analytics", search: "Incident search", anomalies: "Anomaly analysis", compare: "Compare incidents", runbooks: "Runbooks"};
 let liveTimer = null;
 let liveData = null;
 let livePaused = false;
@@ -320,7 +320,7 @@ window.platformRender = function (view) {
   document.querySelectorAll("[data-view]").forEach(a => { a.classList.toggle("active", a.dataset.view === view); if (a.dataset.view === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   $("content").innerHTML = '<div class="loading">Loading workspace...</div>';
   window.platformEnhance();
-  const action = {history: historyView, live: liveView, monitors: () => window.monitoringView?.("monitors"), alerts: () => window.monitoringView?.("alerts"), integrations: () => window.monitoringView?.("integrations"), analytics: analyticsView, search: searchView, anomalies: anomalyView, compare: compareView, runbooks: runbookView}[view];
+  const action = {safety: () => window.safetyView?.(), reliability: () => window.assuranceView?.("reliability"), changes: () => window.assuranceView?.("changes"), reviews: () => window.assuranceView?.("reviews"), catalog: () => window.telemetryView?.("catalog"), incidents: () => window.telemetryView?.("incidents"), connections: () => window.telemetryView?.("connections"), traces: () => window.observabilityView?.("traces"), dependencies: () => window.observabilityView?.("dependencies"), experiments: () => window.observabilityView?.("experiments"), history: historyView, live: liveView, monitors: () => window.monitoringView?.("monitors"), alerts: () => window.monitoringView?.("alerts"), integrations: () => window.monitoringView?.("integrations"), analytics: analyticsView, search: searchView, anomalies: anomalyView, compare: compareView, runbooks: runbookView}[view];
   Promise.resolve().then(action).catch(error => { if (token === platform.request && state.view === view) { $("content").innerHTML = emptyState("Workspace unavailable", esc(error.message)); platformError(error); } });
   return true;
 };

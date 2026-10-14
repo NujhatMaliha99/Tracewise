@@ -1,10 +1,14 @@
-# API Failure Investigator
+# Tracewise
 
 A local-first developer tool for investigating API failures from logs.
 The dashboard groups recurring errors, displays a timeline, links each finding
 to source evidence, and explicitly abstains when no supported pattern matches.
 
-**Version 0.4 adds controlled remote monitoring and authenticated operations:** SQLite-backed case
+![Reliability objectives](docs/screenshots/reliability-objectives.png)
+
+Status: pre-release for local portfolio evaluation. Public hosting and production certification are not included.
+
+**Version 0.8 adds safe workspace recovery and bounded request handling:** SQLite-backed case
 management, lifecycle edits, activity trails, cross-incident TF-IDF retrieval,
 Isolation Forest analysis, live ingestion, service analytics, comparison and runbooks. Error
 diagnoses remain evidence-led rules, not an LLM or autonomous root-cause engine.
@@ -14,10 +18,26 @@ once; log analysis stays local. Explicitly configured HTTPS monitors and webhook
 Active HTTP monitors now add configurable status/latency thresholds, scheduled
 checks, deduplicated alerts, acknowledgement, automatic evidence snapshots and
 recovery-to-monitoring transitions. Python and Node.js SDKs connect local apps.
-There are 13 workspace views. Public HTTPS monitoring is an explicit administrator
+There are 23 workspace views, including an admin-only safety console. Public HTTPS monitoring is an explicit administrator
 allowlist opt-in. Account login supports admin, operator and viewer roles, and a
 transactional webhook outbox provides bounded retries and visible delivery failures.
 See [operations setup](docs/OPERATIONS.md) for accounts, egress and HTTPS proxy configuration.
+
+The [live telemetry workflow](docs/LIVE_TELEMETRY.md) adds environment-scoped ownership and DAG dependencies,
+official protobuf/JSON decoding, SDK-compatible export, incremental correlation, incident timelines,
+and version-checked manual merge/split. Durable collection is opt-in and bounded. The official
+OpenTelemetry SDK example propagates W3C context across real loopback HTTP requests.
+
+The [reliability operations extension](docs/RELIABILITY.md) adds versioned availability/latency objectives,
+observed error budgets, 1h/6h burn watches, before/after change comparisons, and evidence-indexed
+incident review exports with owner/deadline/status follow-ups. Low samples and unknown outcomes are
+explicit, and no change marker is treated as a proven cause. These are retained-sample analyses,
+not a complete production traffic census or automatic paging system.
+
+[Workspace safety](docs/SAFETY.md) adds consistent SQLite ZIP backups, checksums, offline restore
+to a new quarantined database, category/global request throttling and bounded concurrent connections.
+Backups are unencrypted and private; recovered monitors, ingestion and pending notifications do not
+automatically resume. See the [v0.8 release notes](docs/releases/v0.8.0.md).
 
 Optional SMTP email alerts now support verified implicit TLS / STARTTLS and the
 same persistent retry queue. No webhook receiver or VPS is required for local
@@ -27,6 +47,12 @@ helper, provider requirements and controlled failure/recovery test workflow.
 A separate [Task Manager API](docs/TASK_API.md) provides real SQLite-backed CRUD
 and a database-querying health endpoint. Monitor its independent process to test
 actual service-down/restart recovery, without using injected demo responses.
+
+The [multi-service extension](docs/OBSERVABILITY.md) adds a four-service HTTP
+mesh, parent/child span evidence, dependency-incident candidates, and an isolated
+multiple-seed fault suite. A measured [12-run benchmark report](docs/reports/mesh-benchmark-2026-10-14.md)
+covers 144 gateway checks and 972 spans. These are controlled local results,
+not production root-cause or accuracy claims. JSON/Markdown reports are exportable.
 
 ![Analytics workspace - saved demonstration evidence](docs/screenshots/analytics-redesign.jpg)
 
@@ -220,7 +246,7 @@ rejection, host validation, and path traversal. Controlled fixtures do not
 establish production diagnostic accuracy. Additional tests cover persistence,
 optimistic concurrency, recoverable archiving, notes, actual ML behavior,
 retrieval ranking, deterministic outlier scores and saved report endpoints.
-There are 167 Python tests and four Node SDK tests. Coverage includes live
+There are 195 Python tests and four Node SDK tests. Coverage includes live
 retention, URL restrictions, actual HTTP probes, background scheduling,
 concurrent alert deduplication, recovery, cooldown and transactional rollback.
 

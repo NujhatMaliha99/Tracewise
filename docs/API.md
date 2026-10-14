@@ -1,4 +1,22 @@
-# Workspace REST API (v0.4)
+# Workspace REST API (v0.5)
+
+Multi-service endpoints (see OBSERVABILITY.md for protocol and boundaries):
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| POST | `/api/traces/analyze` | Analyze `{content}` transiently; viewer permitted |
+| GET | `/api/experiments` | Latest 50 persisted experiment metadata rows |
+| POST | `/api/experiments` | Admin start `{config:{seeds,scenarios},retain:true}` |
+| POST | `/api/experiments/cancel` | Admin request cooperative worker cancellation |
+| GET | `/api/experiments/:id` | Full measured samples, spans and correlation results |
+| GET | `/api/experiments/:id/export` | JSON artifact attachment |
+| GET | `/api/experiments/:id/report` | Markdown measured report attachment |
+| POST | `/api/experiments/:id/cases` | Admin save `{run_id,episode_id,retain:true}` as an idempotent synthetic case |
+
+Seeds: 1-5 unique integers 0-999999. Scenarios: distinct selections from baseline,
+payments-timeout, service-down, database-contention. One worker per process;
+concurrent start returns 409. No external target URLs or notification destinations
+are accepted by experiment endpoints.
 
 Admin operations now include notification `channel` (`none`, `webhook`, or
 `email`). Delivery `sent` means remote HTTP/SMTP acceptance, not guaranteed email
@@ -91,3 +109,14 @@ and errors), `activity_total_hours`, `undated`, and `synthetic_cases` (explicitl
 labelled sources). Counts exclude archived cases. Missing hours are not filled;
 overlapping imported records may be counted more than once. Activity is saved
 log evidence, not a request-rate or production-uptime measurement.
+# Live Telemetry API
+
+Version 0.6 adds `/v1/traces` (standard OTLP/HTTP JSON/protobuf), `/api/catalog`,
+`/api/telemetry/status`, `/api/telemetry/settings`, `/api/telemetry/evidence`, and
+`/api/live-incidents`. See [payloads, authorization and limits](LIVE_TELEMETRY.md).
+Durable collection is disabled until an administrator explicitly consents.
+# Reliability Operations API
+
+Version 0.7 adds sampled reliability objectives, retained change context, draft incident reviews,
+and versioned follow-ups. [Routes, payloads, permissions and measurement semantics](RELIABILITY.md).
+No SLO watch automatically sends email or claims a complete production traffic census.

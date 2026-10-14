@@ -8,11 +8,18 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="refinements.css">
+  <link rel="stylesheet" href="observability.css">
+  <link rel="stylesheet" href="telemetry.css">
+  <link rel="stylesheet" href="reliability.css">
   <script defer src="vendor/lucide.min.js"></script>
   <script defer src="access.js"></script>
   <script defer src="app.js"></script>
   <script defer src="platform.js"></script>
   <script defer src="monitoring.js"></script>
+  <script defer src="observability.js"></script>
+  <script defer src="telemetry.js"></script>
+  <script defer src="reliability.js"></script>
+  <script defer src="safety.js"></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to investigation</a>
@@ -30,6 +37,17 @@
       <a href="#integrations" data-view="integrations"><i data-lucide="plug"></i> SDK integrations</a>
       <a href="#history" data-view="history"><i data-lucide="inbox"></i> Saved incidents</a>
       <span class="nav-group">INTELLIGENCE</span>
+      <a href="#traces" data-view="traces"><i data-lucide="workflow"></i> Request traces</a>
+      <a href="#dependencies" data-view="dependencies"><i data-lucide="network"></i> Dependency incidents</a>
+      <a href="#experiments" data-view="experiments"><i data-lucide="test-tubes"></i> Fault experiments</a>
+      <a href="#catalog" data-view="catalog"><i data-lucide="network"></i> Service catalog</a>
+      <a href="#incidents" data-view="incidents"><i data-lucide="git-pull-request"></i> Live incidents</a>
+      <a href="#connections" data-view="connections"><i data-lucide="radio-tower"></i> Telemetry connections</a>
+      <span class="nav-group">RELIABILITY</span>
+      <a href="#reliability" data-view="reliability"><i data-lucide="gauge"></i> Reliability objectives</a>
+      <a href="#changes" data-view="changes"><i data-lucide="git-commit-horizontal"></i> Change intelligence</a>
+      <a href="#reviews" data-view="reviews"><i data-lucide="clipboard-check"></i> Incident reviews</a>
+      <a href="#safety" data-view="safety" data-admin-nav><i data-lucide="shield-check"></i> Workspace safety</a>
       <a href="#analytics" data-view="analytics"><i data-lucide="chart-no-axes-combined"></i> Service analytics</a>
       <a href="#search" data-view="search"><i data-lucide="search"></i> Incident search</a>
       <a href="#anomalies" data-view="anomalies"><i data-lucide="scan-line"></i> Anomaly analysis</a>
@@ -38,7 +56,7 @@
       <a href="#method" data-view="method"><i data-lucide="shield-check"></i> Analysis method</a>
     </nav>
     <div class="side-session"><span class="status-dot"></span> Incident workspace<small>Evidence-led diagnostics</small></div>
-    <div class="side-bottom"><i data-lucide="terminal"></i><span>Developer workspace<small>v0.4.0 / Controlled egress</small></span></div>
+    <div class="side-bottom"><i data-lucide="terminal"></i><span>Developer workspace<small>v0.8.0 / Workspace safety</small></span></div>
   </aside>
   <div class="workspace">
     <header class="topbar"><span class="breadcrumb">Workspace <i data-lucide="chevron-right"></i> <strong id="crumb">Investigation</strong></span><span class="privacy"><i data-lucide="lock-keyhole"></i> Local only</span></header>
