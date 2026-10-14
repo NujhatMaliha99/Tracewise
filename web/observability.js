@@ -1,6 +1,6 @@
 "use strict";
 
-const observation = {experiment: null, run: null, imported: null, trace: null, source: "experiments", environment: "development"};
+const observation = {experiment: null, run: null, imported: null, trace: null, source: new URLSearchParams(location.search).get("evidence") === "live" ? "live" : "experiments", environment: "development"};
 let experimentPoll = null;
 const metric = value => value === null || value === undefined ? "-" : Number(value).toFixed(3);
 

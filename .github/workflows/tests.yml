@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python -m pip install -r requirements-otel-demo.txt
+      - run: python -m pip install -r requirements-task-app.txt
       - run: python -m unittest discover -s tests -v
       - run: node --check web/app.js
       - run: node --check web/platform.js
@@ -24,4 +24,6 @@ jobs:
       - run: node --check web/telemetry.js
       - run: node --check web/reliability.js
       - run: node --check web/safety.js
+      - run: node --check task_app/web/app.js
       - run: node --test tests/sdk.test.mjs
+      - run: node --test tests/observability.test.mjs

@@ -96,9 +96,11 @@ class TaskApplicationTests(unittest.TestCase):
         self.assertEqual(self.request()[0], 503)
 
     def test_endpoint_validation(self):
-        for value in ("http://public.example/v1/traces", "https://user:pass@host/v1/traces", "https://host/v1/traces?secret=x"):
+        for value in ("http://public.example/v1/traces", "https://user:pass@host/v1/traces", "https://host/v1/traces?secret=x", "https:///v1/traces", "https://host/v1/traces"):
             with self.assertRaises(ValueError):
                 telemetry(value)
+        with self.assertRaises(ValueError):
+            telemetry("http://127.0.0.1/v1/traces", key="short")
         with self.assertRaises(ValueError):
             origin("https://host/path")
 

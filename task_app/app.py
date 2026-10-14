@@ -27,8 +27,12 @@ def origin(value):
 
 def telemetry(endpoint, key=None, environment="development"):
     parsed = urlsplit(endpoint)
-    if parsed.path != "/v1/traces" or parsed.username or parsed.password or parsed.query or parsed.fragment or (parsed.scheme != "https" and not (parsed.scheme == "http" and parsed.hostname in {"127.0.0.1", "localhost"})):
+    if not parsed.hostname or parsed.path != "/v1/traces" or parsed.username or parsed.password or parsed.query or parsed.fragment or (parsed.scheme != "https" and not (parsed.scheme == "http" and parsed.hostname in {"127.0.0.1", "localhost"})):
         raise ValueError("Telemetry requires HTTPS or loopback HTTP at /v1/traces, without URL credentials or queries.")
+    if key is not None and (not isinstance(key, str) or len(key) < 32):
+        raise ValueError("Exporter key must contain at least 32 characters.")
+    if parsed.hostname not in {"localhost", "127.0.0.1"} and not key:
+        raise ValueError("Remote telemetry requires an exporter authentication key.")
     from investigator.catalog import environment as valid_environment
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk.resources import Resource

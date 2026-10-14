@@ -48,6 +48,20 @@ A separate [Task Manager API](docs/TASK_API.md) provides real SQLite-backed CRUD
 and a database-querying health endpoint. Monitor its independent process to test
 actual service-down/restart recovery, without using injected demo responses.
 
+The [usable task application](docs/TASK_APP.md) adds a browser UI, owner-scoped login,
+version-checked editing, recoverable archives and metadata-only OpenTelemetry export.
+Start both the real task app and its isolated Tracewise receiver locally:
+
+```powershell
+.venv/Scripts/python.exe -m pip install -r requirements-task-app.txt
+.venv/Scripts/python.exe -m task_app.local_stack --retain-telemetry
+```
+
+Tasks run at `http://127.0.0.1:8803`; Tracewise at `http://127.0.0.1:8796/?evidence=live#traces`.
+No tasks or failures are pre-populated. Existing email-demo databases are not reused.
+The consent flag enables bounded local metadata retention, not task-content export.
+Free Render hosting configuration is prepared but public deployment is not yet verified.
+
 The [multi-service extension](docs/OBSERVABILITY.md) adds a four-service HTTP
 mesh, parent/child span evidence, dependency-incident candidates, and an isolated
 multiple-seed fault suite. A measured [12-run benchmark report](docs/reports/mesh-benchmark-2026-10-14.md)

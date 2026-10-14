@@ -27,7 +27,12 @@ def main():
         parser.error("Non-loopback hosting requires accounts, an HTTPS public origin and --waitress.")
     accounts = json.loads(Path(args.accounts).read_text()) if args.accounts else None
     provider = telemetry(args.telemetry_endpoint, os.environ.get("TRACEWISE_OTLP_KEY"), args.environment) if args.telemetry_endpoint else None
-    app = TaskApplication(args.db, accounts, args.public_origin, provider)
+    try:
+        app = TaskApplication(args.db, accounts, args.public_origin, provider)
+    except Exception:
+        if provider:
+            provider.shutdown()
+        raise
     try:
         print(f"Tracewise Tasks: {args.public_origin or 'http://127.0.0.1:' + str(args.port)}", flush=True)
         if args.waitress:

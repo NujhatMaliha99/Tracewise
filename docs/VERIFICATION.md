@@ -306,3 +306,18 @@ autonomous remediation, or notification-delivery claim follows from these local 
   port 8795 with its own restored/quarantined database. Request limits remain single-process controls.
 
 No public hosting, distributed load test, DDoS resilience or production security certification is claimed.
+
+## Connected Task Application / 2026-10-15
+
+- Complete Python regression suite: 276 tests passed locally. Node SDK and evidence-source tests: 7 passed. Updated task/frontend scripts pass Node syntax checks.
+- Actual HTTP tests create and update tasks through the WSGI listener, export official SDK protobuf over OTLP HTTP, and verify retained Tracewise evidence without task titles or descriptions. Healthy traffic produces no failure incidents.
+- Isolated SQLite failure tests verify HTTP 503 and real receiver incident creation, not a fault-injection API in the usable application.
+- Restart tests preserve user-created tasks in separate temporary SQLite files and avoid duplicating registered service identities.
+- Waitress 3.0.2 was installed from the project's declared dependency and tested over loopback HTTP for health, login, Secure/HttpOnly cookie flags, unauthenticated denial and authenticated task creation. This does not verify public TLS termination or Render proxy behavior.
+- Browser verification used the connected local stack on task port 8803 and Tracewise port 8796. A verification task was manually created and completed; five real task HTTP requests appeared in retained live traces with zero error events. This task is not application seed data.
+- The launcher's invalid `#telemetry` link was replaced by `?evidence=live#traces`. Three Node tests cover explicit live selection, the existing experiment default, and fallback for unknown source values.
+- Screenshots: `docs/screenshots/connected-task-board.png` and `docs/screenshots/connected-task-traces.png`.
+- The user's SMTP-enabled port-8790 service and credentials were not accessed or reconfigured. Connected-stack retention is opt-in via a CLI consent flag; it uses its own database files and starts no SMTP or background monitor workers.
+- CI now installs the hosted-server requirements and checks task-app JavaScript and evidence-source behavior. The local checks above are confirmed; a new hosted CI run has not yet been observed.
+
+Public deployment, hosted account isolation, end-to-end HTTPS telemetry, hosted notification delivery and free-tier durability remain unverified. See the deployment acceptance checklist in [task application setup](TASK_APP.md).
