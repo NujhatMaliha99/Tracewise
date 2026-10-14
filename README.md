@@ -19,6 +19,15 @@ allowlist opt-in. Account login supports admin, operator and viewer roles, and a
 transactional webhook outbox provides bounded retries and visible delivery failures.
 See [operations setup](docs/OPERATIONS.md) for accounts, egress and HTTPS proxy configuration.
 
+Optional SMTP email alerts now support verified implicit TLS / STARTTLS and the
+same persistent retry queue. No webhook receiver or VPS is required for local
+email alerts. See [email setup](docs/EMAIL.md) for the hidden-password Windows
+helper, provider requirements and controlled failure/recovery test workflow.
+
+A separate [Task Manager API](docs/TASK_API.md) provides real SQLite-backed CRUD
+and a database-querying health endpoint. Monitor its independent process to test
+actual service-down/restart recovery, without using injected demo responses.
+
 ![Analytics workspace - saved demonstration evidence](docs/screenshots/analytics-redesign.jpg)
 
 See [verification notes](docs/VERIFICATION.md) for tested workflows and remaining
@@ -211,7 +220,7 @@ rejection, host validation, and path traversal. Controlled fixtures do not
 establish production diagnostic accuracy. Additional tests cover persistence,
 optimistic concurrency, recoverable archiving, notes, actual ML behavior,
 retrieval ranking, deterministic outlier scores and saved report endpoints.
-There are 143 Python tests and four Node SDK tests. Coverage includes live
+There are 167 Python tests and four Node SDK tests. Coverage includes live
 retention, URL restrictions, actual HTTP probes, background scheduling,
 concurrent alert deduplication, recovery, cooldown and transactional rollback.
 

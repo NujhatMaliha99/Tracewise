@@ -22,6 +22,7 @@ from investigator.monitoring import MonitorEngine
 from investigator.outbound import EgressPolicy
 from investigator.access import Access
 from investigator.delivery import Delivery
+from investigator.mail import SMTPConfig, EmailSender
 
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "web"
@@ -30,7 +31,9 @@ STATIC = ROOT / "web"
 class InvestigatorServer(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, address, db_path=":memory:", accounts=None, public_origin=None, remote_hosts=(), webhook_url=None, webhook_hosts=(), ingest_key=None):
+    def __init__(self, address, db_path=":memory:", accounts=None, public_origin=None, remote_hosts=(), webhook_url=None, webhook_hosts=(), ingest_key=None, smtp_config=None):
+        if smtp_config and webhook_url:
+            raise ValueError("Choose either SMTP email or webhook delivery, not both.")
         self.access = Access(accounts)
         if public_origin:
             parsed = urlparse(public_origin)
@@ -52,7 +55,7 @@ class InvestigatorServer(ThreadingHTTPServer):
         self.store = CaseStore(db_path)
         self.stream = LiveBuffer()
         self.monitor_demo_mode = "healthy"
-        self.delivery = Delivery(self.store, webhook_policy, webhook_url)
+        self.delivery = Delivery(self.store, webhook_policy, webhook_url, email_sender=EmailSender(smtp_config) if smtp_config else None)
         with self.store.lock, self.store.db:
             self.store.db.execute("CREATE TABLE IF NOT EXISTS access_audit(id INTEGER PRIMARY KEY, timestamp TEXT, username TEXT, role TEXT, path TEXT)")
         self.monitors = MonitorEngine(self.store, self.stream, policy=self.egress, delivery=self.delivery)
@@ -342,7 +345,8 @@ if __name__ == "__main__":
                             remote_hosts=os.environ.get("TRACEWISE_REMOTE_HOSTS", "").split(","),
                             webhook_url=os.environ.get("TRACEWISE_WEBHOOK_URL"),
                             webhook_hosts=os.environ.get("TRACEWISE_WEBHOOK_HOSTS", "").split(","),
-                            ingest_key=os.environ.get("TRACEWISE_INGEST_KEY")) as server:
+                            ingest_key=os.environ.get("TRACEWISE_INGEST_KEY"),
+                            smtp_config=SMTPConfig.from_env(os.environ)) as server:
         print(f"API Failure Investigator: http://127.0.0.1:{server.server_port}", flush=True)
         try:
             server.serve_forever()

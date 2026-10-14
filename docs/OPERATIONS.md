@@ -1,5 +1,9 @@
 # Controlled Remote Operations (v0.4)
 
+SMTP email is also available as an alternative to webhook delivery. Configure
+only one channel; see [email setup](EMAIL.md). Pending messages follow the current
+channel, so review existing queues before switching or use an isolated demo DB.
+
 This version can monitor approved public HTTPS endpoints and deliver generic
 JSON webhook notifications. It adds shared-workspace login and role enforcement.
 It does not turn the Python development server into a managed production service.

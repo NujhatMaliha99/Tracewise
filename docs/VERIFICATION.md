@@ -1,5 +1,41 @@
 # Verification
 
+## Independent Task API Integration
+
+Eight additional tests cover task CRUD, actual database-backed health/503 errors,
+invalid inputs, Host/Origin/content-type guards, missing routes, body limits,
+real HTTP probes, persistent tasks, and actual process stop/restart detection
+with monitor recovery. Tests use isolated HTTP servers and temporary databases;
+the stop/restart test sends no external email. The development Task API was
+started separately on loopback port 8800, its `/health` returned database ready,
+and the Task Manager API monitor returned healthy / HTTP 200 after integration.
+Existing demo monitors and SMTP settings were not modified. No public hosting
+or production reliability is claimed.
+
+On 14 October 2026, the user reported receiving both opened (HTTP 503) and
+recovered messages for the correct controlled-demo endpoint. This is user-reported
+end-to-end SMTP verification, not independent inbox inspection. An earlier
+connection-failure email came from a misconfigured port-8000 monitor and must
+not be presented as an injected-demo recovery test.
+
+## SMTP Email Alerts
+
+159 Python tests and four Node SDK tests pass. Sixteen new email tests exercise
+environment parsing, disabled/partial configuration, TLS-only ports, mailbox and
+event-header injection rejection, secret-safe repr, verified SSL contexts,
+STARTTLS-before-authentication, no login on TLS failure, rejected recipients,
+recovery subjects, queue retries with secret-safe errors, channel conflicts and
+deduplicated monitor-open/recovery email transitions. SMTP clients are mocked;
+no real external email or inbox delivery was tested. PowerShell helper parsed
+successfully, and the changed JavaScript passed syntax checks.
+
+The first sandbox run blocked existing loopback HTTP and temporary SQLite tests;
+the complete suite passed after rerunning with the required local access. A
+mailbox parser exception exposed by the new tests was normalized to a safe
+validation error. Browser verification of the label change was blocked by the
+browser security policy; no visual QA or new screenshot is claimed. SMTP is not
+configured in the regular local preview. User app-password setup remains pending.
+
 ## Controlled Remote Operations (v0.4)
 
 143 Python tests and four Node SDK tests pass. New coverage exercises optional

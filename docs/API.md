@@ -1,5 +1,10 @@
 # Workspace REST API (v0.4)
 
+Admin operations now include notification `channel` (`none`, `webhook`, or
+`email`). Delivery `sent` means remote HTTP/SMTP acceptance, not guaranteed email
+inbox delivery. SMTP settings and addresses are never returned to the dashboard.
+See [email setup](EMAIL.md) for environment settings and the local test workflow.
+
 Default origin: `http://127.0.0.1:8790`. Optional shared-workspace role-based sessions.
 JSON mutation endpoints require an approved Host, same origin when supplied, and
 `Content-Type: application/json`. Errors use `{ "error": "message" }`.

@@ -1,4 +1,4 @@
-"""Transactional webhook outbox. At-least-once delivery with bounded retries."""
+"""Transactional notification outbox. At-least-once delivery with bounded retries."""
 
 import json
 import time
@@ -7,9 +7,13 @@ from investigator.store import now
 
 
 class Delivery:
-    def __init__(self, store, policy, url=None, sender=None, clock=time.time):
+    def __init__(self, store, policy, url=None, sender=None, clock=time.time, email_sender=None):
+        if url and email_sender:
+            raise ValueError("Choose either SMTP email or webhook delivery, not both.")
         self.store, self.policy, self.url, self.clock = store, policy, url, clock
-        self.sender = sender or self._send
+        self.enabled = bool(url or email_sender)
+        self.channel = "email" if email_sender else "webhook" if url else "none"
+        self.sender = email_sender or sender or self._send
         if url:
             policy.validate(url)
         with store.lock, store.db:
@@ -19,7 +23,7 @@ class Delivery:
                 created_at TEXT NOT NULL, last_error TEXT)""")
 
     def enqueue(self, alert_id, transition, name, reason):
-        if not self.url:
+        if not self.enabled:
             return
         payload = {"text": f"Tracewise: {name} / {transition} / {reason}",
                    "event_id": alert_id + ":" + transition, "transition": transition}
@@ -40,7 +44,7 @@ class Delivery:
             connection.close()
 
     def flush(self):
-        if not self.url:
+        if not self.enabled:
             return
         with self.store.lock:
             row = self.store.db.execute("SELECT * FROM deliveries WHERE state='pending' AND due<=? ORDER BY id LIMIT 1", (self.clock(),)).fetchone()
@@ -61,11 +65,11 @@ class Delivery:
         with self.store.lock:
             counts = {r["state"]: r["count"] for r in self.store.db.execute("SELECT state,COUNT(*) AS count FROM deliveries GROUP BY state")}
             recent = [dict(r) for r in self.store.db.execute("SELECT event_key,state,attempts,created_at,last_error FROM deliveries ORDER BY id DESC LIMIT 20")]
-        return {"configured": bool(self.url), "counts": counts, "recent": recent}
+        return {"configured": self.enabled, "channel": self.channel, "counts": counts, "recent": recent}
 
     def retry(self, event_key):
-        if not self.url:
-            raise ValueError("No webhook configured.")
+        if not self.enabled:
+            raise ValueError("No notification channel configured.")
         with self.store.lock, self.store.db:
             if self.store.db.execute("SELECT COUNT(*) FROM deliveries WHERE state='pending'").fetchone()[0] >= 1000:
                 raise ValueError("Pending queue is full.")
