@@ -1,0 +1,2 @@
+-r requirements-otel-demo.txt
+waitress>=3.0.2,<4

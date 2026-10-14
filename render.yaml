@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: tracewise
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python scripts/render_tracewise.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: TRACEWISE_ACCOUNTS_FILE
+        value: /etc/secrets/tracewise-accounts.json
+      - key: TRACEWISE_OTLP_KEY
+        sync: false
+  - type: web
+    name: tracewise-tasks
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-task-app.txt
+    startCommand: python -m task_app.render_start
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: TASKBOARD_ACCOUNTS_FILE
+        value: /etc/secrets/task-accounts.json
+      - key: TASKBOARD_ENVIRONMENT
+        value: portfolio
+      - key: TASKBOARD_OTLP_ENDPOINT
+        sync: false
+      - key: TRACEWISE_OTLP_KEY
+        sync: false

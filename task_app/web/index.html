@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tracewise Tasks</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css">
+  <script defer src="/lucide.min.js"></script><script defer src="/app.js"></script>
+</head>
+<body>
+  <header><a class="brand" href="/"><img src="/favicon.svg" alt="" width="32" height="32"><strong>Tracewise Tasks</strong></a><div class="account"><span id="identity"></span><button id="signout" class="icon" title="Sign out" aria-label="Sign out" hidden><i data-lucide="log-out"></i></button></div></header>
+  <main>
+    <div id="notice" role="status" hidden></div>
+    <section id="login" hidden><h1>Sign in</h1><form id="login-form"><label>Username<input id="username" autocomplete="username" maxlength="80" required></label><label>Password<input id="password" type="password" autocomplete="current-password" maxlength="256" required></label><button class="primary" type="submit">Sign in <i data-lucide="arrow-right"></i></button></form></section>
+    <section id="workspace" hidden>
+      <div class="page-heading"><div><span class="eyebrow">PERSONAL WORKSPACE</span><h1>Tasks</h1></div><div class="commands"><button id="refresh" class="icon" title="Refresh tasks" aria-label="Refresh tasks"><i data-lucide="refresh-cw"></i></button><button id="new-task" class="primary"><i data-lucide="plus"></i> New task</button></div></div>
+      <div class="overview"><div><span>To do</span><strong id="count-todo">0</strong></div><div><span>In progress</span><strong id="count-doing">0</strong></div><div><span>Completed</span><strong id="count-done">0</strong></div><div><span>Overdue</span><strong id="count-overdue">0</strong></div></div>
+      <div class="toolbar"><nav id="status-filters" aria-label="Task status"><button data-status="all" aria-pressed="true">All</button><button data-status="todo">To do</button><button data-status="doing">In progress</button><button data-status="done">Done</button><button data-status="archived"><i data-lucide="archive"></i> Archived</button></nav><div class="filters"><label class="search"><i data-lucide="search"></i><input id="search" type="search" placeholder="Search tasks" aria-label="Search tasks"></label><select id="priority-filter" aria-label="Filter priority"><option value="all">All priorities</option><option value="high">High priority</option><option value="medium">Medium priority</option><option value="low">Low priority</option></select></div></div>
+      <div class="table-wrap"><table><thead><tr><th class="check-column"><span class="sr-only">Completion</span></th><th>Task</th><th>Status</th><th>Priority</th><th>Due date</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="tasks"></tbody></table></div>
+      <div id="empty" class="empty" hidden><i data-lucide="list-todo"></i><h2>No tasks</h2></div><div class="list-footer"><span id="visible-count"></span><span id="telemetry-state"></span></div>
+    </section>
+  </main>
+  <dialog id="task-dialog" aria-labelledby="task-heading"><div class="dialog-heading"><h2 id="task-heading">New task</h2><button id="close-task" class="icon" aria-label="Close task editor" title="Close"><i data-lucide="x"></i></button></div><form id="task-form"><label>Title<input id="task-title" maxlength="200" required></label><label>Description<textarea id="task-description" maxlength="4000" rows="4"></textarea></label><div class="form-grid"><label>Status<select id="task-status"><option value="todo">To do</option><option value="doing">In progress</option><option value="done">Done</option></select></label><label>Priority<select id="task-priority"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label><label>Due date<input id="task-due" type="date"></label></div><p id="form-error" class="error" role="alert"></p><div class="dialog-footer"><button class="primary" type="submit"><i data-lucide="check"></i> Save task</button></div></form></dialog>
+  <dialog id="history-dialog" aria-labelledby="history-heading"><div class="dialog-heading"><h2 id="history-heading">Task history</h2><button id="close-history" class="icon" aria-label="Close history" title="Close"><i data-lucide="x"></i></button></div><ol id="history-list"></ol></dialog>
+</body></html>
